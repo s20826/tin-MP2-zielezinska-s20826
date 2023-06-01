@@ -1,0 +1,18 @@
+var express = require('express');
+var router = express.Router();
+
+const visitController = require('../controllers/visitController');
+
+router.get('/', visitController.showVisitList);
+router.get('/add', visitController.showVisitForm);
+router.post('/add',visitController.addVisit);
+router.get('../../animals/details/:animalId', visitController.showVisitDetails);
+router.get('/edit/:idVisit', visitController.showVisitEdit);
+router.post('/edit',visitController.updateVisit);
+router.get('/afterAdd', visitController.showVisitListAfterAdd);
+router.get('/afterEdit', visitController.showVisitListAfterEdit);
+router.get('/afterDelete', visitController.showVisitListAfterDelete);
+router.get('/ifDelete/:idVisit', visitController.showVisitDelete);
+router.get('/delete/:idVisit', visitController.deleteVisit);
+
+module.exports = router;

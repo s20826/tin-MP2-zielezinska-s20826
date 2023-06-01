@@ -1,0 +1,75 @@
+const VetRepository = require('../repository/mysql2/vetRepository');
+
+exports.getVets= (req, res, next) => {
+    VetRepository.getVets()
+        .then(a => {
+            console.log(a)
+            res.status(200).json(a);
+        })
+        .catch(err => {
+            console.log(err);
+        });
+};
+
+exports.getVetById = (req, res, next) => {
+    const idVet = req.params.idVet;
+    VetRepository.getVetById(idVet)
+        .then(a => {
+            if(!a){
+                console.log(a)
+                res.status(404).json({
+                    message: 'Vet with id:'+ idVet +'not found'
+                })
+            }else {
+                res.status(200).json(a);
+
+            }
+        })
+
+};
+exports.createVet = (req, res, next) => {
+    VetRepository.createVet(req.body)
+        .then(v => {
+            res.status(201).json(v);
+        })
+        .catch(err => {
+            console.log(err)
+            if(!err.statusCode){
+                err.statusCode = 500;
+            }
+            next(err);
+        });
+};
+
+exports.updateVet = (req, res, next) => {
+    const idVet = req.params.idVet;
+    VetRepository.updateVet(idVet, req.body)
+        .then(v => {
+            res.status(200).json({
+                message: 'Vet updated!', client: v
+            });
+        })
+        .catch(err => {
+            console.log(err)
+            if(!err.statusCode){
+                err.statusCode = 500;
+            }
+            next(err);
+        });
+};
+
+exports.deleteVet = (req, res, next) => {
+    const idVet = req.params.idVet;
+    VetRepository.deleteVet(idVet)
+        .then(v => {
+            res.status(200).json({
+                message: 'Vet removed!', vet: v
+            });
+        })
+        .catch(err => {
+            if(!err.statusCode){
+                err.statusCode = 500;
+            }
+            next(err);
+        });
+};

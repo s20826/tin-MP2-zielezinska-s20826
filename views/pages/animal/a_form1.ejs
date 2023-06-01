@@ -1,0 +1,199 @@
+<%- include('../../fragments/header.ejs')%>
+<main>
+
+    <h2><%= pageTitle %></h2>
+    <form class="form" id="form" method="post" action="<%=formAction%>" novalidate onsubmit="return validateForm();" >
+        <input type="hidden" name="idAnimal" value="<%= Animal.idAnimal%>"/>
+
+        <label for="name"><%= __('animal.fields.name')%>:<span class="symbol-required"><%=(formMode == 'showDetails') ? '':'*'%></span></label>
+        <input class="<%= validationErrors.find(e => e.path.includes('name')) ? 'error-input' : ''%>"
+               type="text" name="name" id="name" placeholder="2-30 <%= __('form-placeholder.character')%> " value="<%=Animal.name%>"
+                <%=(formMode == 'showDetails') ? 'disabled':'required'%> />
+        <span id="errorName" class="errors-text">
+            <%if (validationErrors.find(e=> e.path.includes('name'))) { %>
+                <%= validationErrors.find(e=> e.path.includes('name')).message %>
+            <%}%>
+        </span>
+        <div style="display: none">
+            <span id="error-required"><%= __('validationMessage.fieldRequired')%></span>
+            <span id="error-min"><%= __('validationMessage.fieldMin')%></span>
+            <span id="error-max"><%= __('validationMessage.fieldMax')%></span>
+            <span id="error-character"><%= __('validationMessage.characters')%></span>
+            <span id="error-numberMinMax"><%= __('validationMessage.fieldNumberMinMax')%></span>
+            <span id="error-number"><%= __('validationMessage.filedNumber')%></span>
+            <span id="error-date"><%= __('validationMessage.fieldDate')%></span>
+
+        </div>
+
+        <label for="species"><%= __('animal.fields.species')%>: <span class="symbol-required"><%=(formMode == 'showDetails') ? '':'*'%></span></label>
+        <input class="<%= validationErrors.find(e=> e.path.includes('species')) ? 'error-input' : ''%>"
+                type="text" name="species" id="species" placeholder="2-30 <%= __('form-placeholder.character')%>" value="<%=Animal.species%>"
+                <%=(formMode == 'showDetails') ? 'disabled':'required'%> />
+        <span id="errorSpecies" class="errors-text">
+            <%if (validationErrors.find(e=> e.path.includes('species'))) { %>
+                <%= validationErrors.find(e=> e.path.includes('species')).message %>
+            <%}%>
+        </span>
+
+        <label for="breed"><%= __('animal.fields.breed')%>: </label>
+        <input class="<%= validationErrors.find(e=> e.path.includes('breed')) ? 'error-input' : ''%>"
+                type="text" name="breed" id="breed"  placeholder="2-50 <%= __('form-placeholder.character')%>" value="<%=Animal.breed%>"
+                <%=(formMode == 'showDetails') ? 'disabled':'required'%>/>
+        <span id="errorBreed" class="errors-text">
+            <%if (validationErrors.find(e=> e.path.includes('breed'))) { %>
+                <%= validationErrors.find(e=> e.path.includes('breed')).message %>
+            <%}%>
+        </span>
+
+
+        <label for="weight"><%= __('animal.fields.weight')%>: <span class="symbol-required"><%=(formMode == 'showDetails') ? '':'*'%></span></label>
+        <input class="<%= validationErrors.find(e=> e.path.includes('weight')) ? 'error-input' : ''%>"
+                type="number"  step="0.1" name="weight" id="weight"  placeholder="0.1 - 10 000" value="<%=Animal.weight%>"
+                <%=(formMode == 'showDetails') ? 'disabled':'required'%>/>
+        <span id="errorWeight" class="errors-text">
+            <%if (validationErrors.find(e=> e.path.includes('weight'))) { %>
+                <%= validationErrors.find(e=> e.path.includes('weight')).message %>
+            <%}%>
+        </span>
+
+        <label for="birthDate"><%= __('animal.fields.birthDate')%>: <span class="symbol-required"><%=(formMode == 'showDetails') ? '':'*'%></span> </label>
+        <input class="<%= validationErrors.find(e=> e.path.includes('birthDate')) ? 'error-input' : ''%>"
+               type="date" name="birthDate" id="birthDate" placeholder="dd.mm.rrrr"
+                <%if (formMode == 'add') { %>
+                    value="<%=Animal.birthDate %>"
+                <%}else if(ifAfterError=='yes') { %>
+                    value="<%=Animal.birthDate %>"
+                <%}else{%>
+                    value="<%=Animal.birthDate.toISOString().split('T')[0]%>"
+                <%}%>
+                <%=(formMode == 'showDetails') ? 'disabled':'required'%>/>
+        <span id="errorBirthDate" class="errors-text">
+            <%if (validationErrors.find(e=> e.path.includes('birthDate'))) { %>
+                <%= validationErrors.find(e=> e.path.includes('birthDate')).message %>
+            <%}%>
+        </span>
+
+        <label for="owner"><%= __('animal.fields.owner')%>:
+            <span class="symbol-required"><%=(formMode == 'showDetails') ? '':'*'%></span>
+        </label>
+        <%if (formMode != 'showDetails') { %>
+            <select class="<%= validationErrors.find(e=> e.path.includes('idClient')) ? 'error-input' : ''%>"
+                    name="idClient" id="idClient" required >
+
+
+                <option value="" selected><%= __('form-placeholder.choose-client')%></option>
+                <%for (let i=0;i< TabClients.length ;i++) {let c = TabClients[i]; %>
+                <option
+                        value="<%=c.idClient%>" label="<%=c.firstName+" "+c.lastName%>"
+                        <%if ((Animal.idAnimal && formMode=='add') || ifAfterError=='yes') {%>
+                        <%= (c.idClient.toString() == Animal.idClient.toString() )?'selected':''%>
+                        <%}if(formMode!='add' && ifAfterError=='no'){%>
+                            <%= (c.idClient.toString() == Animal.client.idClient.toString() )?'selected':''%>
+                        <%}%>
+                > </option>
+                <%}%>
+            </select>
+        <%}else{%>
+        <input type="text" name="owner" id="owner" value="<%=Animal.client.clientFirstName+" "+Animal.client.clientLastName%>"
+        />
+        <%}%>
+        <span id="errorOwner" class="errors-text">
+            <%if (validationErrors.find(e=> e.path.includes('idClient'))) { %>
+                <%= validationErrors.find(e=> e.path.includes('idClient')).message %>
+            <%}%>
+        </span>
+
+        <%if (formMode != 'showDetails' ) { %>
+            <div class="form-buttons">
+                <button class="form-actions-button-submit" type="submit"  >
+                    <svg class="form-actions-button-submit" xmlns="http://www.w3.org/2000/svg"  width="50" height="50" fill="#000000" viewBox="0 0 256 256">
+                        <rect width="256" height="256" fill="none"></rect>
+                        <polyline class="details-icon-color" points="216 72.005 104 184 48 128.005" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline>
+                    </svg>
+                </button>
+                <a  href="/animals" >
+                    <svg class="form-actions-button-cancel" xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="#000000" viewBox="0 0 256 256">
+                        <rect width="256" height="256" fill="none"></rect>
+                        <line class="details-icon-color" x1="200" y1="56" x2="56" y2="200" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                        <line class="details-icon-color" x1="200" y1="200" x2="56" y2="56" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                    </svg>
+                </a>
+            </div>
+        <%}else{%>
+            <div >
+                <a href="../../animals/edit/<%= Animal.idAnimal %>" >
+                    <svg class="form-actions-button-submit" xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#000000" viewBox="0 0 256 256">
+                        <rect  width="256" height="256" fill="none"></rect>
+                        <path class="details-icon-color" d="M96,216H48a8,8,0,0,1-8-8V163.31371a8,8,0,0,1,2.34315-5.65686l120-120a8,8,0,0,1,11.3137,0l44.6863,44.6863a8,8,0,0,1,0,11.3137Z" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                        <line class="details-icon-color" x1="136" y1="64" x2="192" y2="120" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                        <polyline class="details-icon-color" points="216 216 96 216 40.509 160.509" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline>
+                    </svg>
+                </a>
+            </div>
+        <%}%>
+    </form>
+
+    <%if (formMode == 'showDetails') { %>
+    <h2><%= __('animal.pages.detail.visits')%></h2>
+    <table class="table-list">
+        <thead>
+        <tr>
+          <th><%= __('visit.fields.vet')%></th>
+            <th><%= __('visit.fields.date')%> </th>
+            <th><%= __('visit.fields.service')%> </th>
+            <th><%= __('visit.fields.price')%> </th>
+
+        </tr>
+        <tbody>
+        <%for (let v of Animal.visits) { %>
+        <  tr>
+            <td><%=v.vet.vetFirstName +" "+ v.vet.vetLastName%></td>
+            <td><%=v.date.toISOString().replace(/T/, ' ').
+                        replace(/\..+/, '') %></td>
+            <td><%=v.service%></td>
+            <td><%=v.price%></td>
+
+            <td>
+                <ul class="list-actions">
+                    <li>
+                        <a href="../../visits/edit/<%=v.idVisit%>" >
+                            <svg class="list-actions-button-edit" xmlns="http://www.w3.org/2000/svg" width="192" height="192" fill="#000000" viewBox="0 0 256 256">
+                                <rect class="details-icon-color" width="256" height="256" fill="none"></rect>
+                                <path class="details-icon-color" d="M96,216H48a8,8,0,0,1-8-8V163.31371a8,8,0,0,1,2.34315-5.65686l120-120a8,8,0,0,1,11.3137,0l44.6863,44.6863a8,8,0,0,1,0,11.3137Z" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                                <line class="details-icon-color" x1="136" y1="64" x2="192" y2="120" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                <polyline class="details-icon-color" points="216 216 96 216 40.509 160.509" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline>
+                            </svg>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="../../visits/delete/<%=v.idVisit%>">
+                            <svg  class="list-actions-button-delete" xmlns="http://www.w3.org/2000/svg" width="192" height="192" fill="#000000" viewBox="0 0 256 256">
+                                <rect width="256" height="256" fill="none"></rect>
+                                <line class="details-icon-color" x1="215.99609" y1="56" x2="39.99609" y2="56.00005" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+        <td><%=v.date.toISOString().replace(/T/, ' ').
+            replace(/\..+/, '') %></td>
+        <td><%=v.service%></td>
+        <td><%=v.price%></td>
+
+        <td>
+            <ul class="list-actions">
+                <li>
+                    <a href="../../visits/edit/<%=v.idVisit%>" >
+                    <line class="details-icon-color" x1="104" y1="104" x2="104" y2="168" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                <line class="details-icon-color" x1="152" y1="104" x2="152" y2="168" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                <path class="details-icon-color"d="M200,56V208a8,8,0,0,1-8,8H64a8,8,0,0,1-8-8V56" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                                <path class="details-icon-color" d="M168,56V40a16,16,0,0,0-16-16H104A16,16,0,0,0,88,40V56" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                            </svg>
+                        </a>
+                    </li>
+
+                </ul>
+            </td>
+        </tr>
+        <%}%>
+        </tbody>
+    </table>
+</main>
+<%}%>
+
+<%- include('../../fragments/footer.ejs')%>

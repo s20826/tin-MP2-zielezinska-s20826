@@ -1,0 +1,194 @@
+const db = require('../../config/mysql2/db');
+const vSchema = require('../../model/joi/Vet')
+const authUtil = require('../../util/authUtils');
+
+
+exports.getVets = () => {
+
+    return db.promise().query('SELECT * FROM Person p right JOIN Vet v on v.idVet = p.idPerson')
+        .then( (results, fields) =>{
+            console.log(results[0]);
+            return results[0];
+        })
+        .catch( err => {
+            console.log(err);
+            throw err;
+        })
+};
+
+exports.getVetById = (idVet) => {
+
+    const query = 'SELECT v.idVet, p.firstName, p.lastName, p.email ' +
+        'from Person p right JOIN  Vet v on v.idVet = p.idPerson ' +
+        'where idVet = ? '
+
+
+    return db.promise().query(query, [idVet])
+        .then((results, fields) => {
+
+            const firstRow = results[0][0];
+            if(!firstRow){
+                return {};
+            }
+
+            return {
+                idVet: parseInt(idVet),
+                firstName: firstRow.firstName,
+                lastName: firstRow.lastName,
+                email: firstRow.email,
+
+            };
+
+        })
+        .catch( err => {
+            console.log(err);
+            throw err;
+        })
+
+};
+
+checkEmailUnique = (email, idVet) => {
+    let promise;
+    if(idVet){
+        const sql = `SELECT COUNT(1) as c FROM Person where idPerson != ? and email = ?`;
+        promise = db.promise().query(sql, [idVet, email]);
+    }else{
+        const sql = 'SELECT COUNT(1) as c FROM Person where email = ?';
+        promise = db.promise().query(sql, [email]);
+    }
+    return promise.then( (results, fields) => {
+        const count = results[0][0].c;
+        let err = null;
+        if(count > 0){
+            err = {
+                details: [{
+                    path: ['email'],
+                    message: 'Podany adres email jest już używany'
+                }]
+            };
+        }
+        return err;
+    });
+}
+
+
+exports.createVet = (newVetData) => {
+    const vRes = vSchema.validate(newVetData,{ abortEarly: false });
+    if(vRes.error){
+        return Promise.reject(vRes.error);
+    }
+
+    return checkEmailUnique(newVetData.email)
+        .then(emailErr =>{
+            if(emailErr){
+                return Promise.reject(emailErr);
+            }
+            else {
+                const firstName= newVetData.firstName;
+                const lastName= newVetData.lastName;
+                const email= newVetData.email;
+                const passHash = authUtil.hashPassword(newVetData.password);
+                
+
+
+                const sql = 'INSERT into Person (firstName, lastName, email) VALUES (?, ?, ?)';
+                const sql1 = 'INSERT into Vet (idVet, password) VALUES (LAST_INSERT_ID(),?)';
+
+
+                return db.promise()
+                    .execute(sql,[ firstName,lastName,email])
+                    .then(()=> {
+                        return db.promise().execute(sql1,[passHash])
+                    });
+            }
+        })
+        .catch(err => {
+            return Promise.reject(err);
+    });
+
+
+};
+exports.updateVet = (idVet, vetData) => {
+
+    const vRes = vSchema.validate(vetData,{ abortEarly: false });
+    if(vRes.error){
+        return Promise.reject(vRes.error);
+    }
+
+    return checkEmailUnique(vetData.email,idVet)
+        .then(emailErr =>{
+            if(emailErr){
+                return Promise.reject(emailErr);
+            }
+            else {
+                const firstName= vetData.firstName;
+                const lastName= vetData.lastName;
+                const email= vetData.email;
+                const passHash = authUtil.hashPassword(vetData.password);
+
+                const sql = 'UPDATE Person set firstName=?, lastName=?, email=? where idPerson = ?';
+                const sql1 = 'UPDATE Vet set password=? where idVet = ?';
+
+
+                return db.promise()
+                    .execute(sql,[ firstName,lastName,email,idVet])
+                    .then(()=> {
+                        return db.promise().execute(sql1,[passHash, idVet])
+                    });
+            }
+        })
+        .catch(err => {
+            return Promise.reject(err);
+        });
+};
+
+
+
+exports.deleteVet = (idVet) => {
+
+    const sql = 'DELETE FROM Visit where idVet =?';
+    const sql1 = 'DELETE FROM Vet where idVet = ?';
+    const sql2 = 'DELETE FROM Person where idPerson = ?';
+
+
+    return db.promise()
+        .execute(sql,[idVet])
+        .then( ()=> {
+            return db.promise().execute(sql1,[idVet])
+        })
+        .then( ()=> {
+            return db.promise().execute(sql2, [idVet]);
+        });
+};
+
+
+exports.findByEmail = (email) => {
+
+    const query = 'SELECT v.idVet, p.firstName, p.lastName, p.email, v.password, v.role ' +
+        'from Person p right JOIN  Vet v on v.idVet = p.idPerson ' +
+        'where email = ? '
+
+
+    return db.promise().query(query, [email])
+        .then((results, fields) => {
+
+            const firstRow = results[0][0];
+            if(!firstRow){
+                return {};
+            }
+
+            return {
+                idVet: parseInt(firstRow.idVet),
+                firstName: firstRow.firstName,
+                lastName: firstRow.lastName,
+                email: firstRow.email,
+                password: firstRow.password,
+                role:firstRow.role
+            };
+
+        })
+        .catch( err => {
+            console.log(err);
+            throw err;
+        });
+}

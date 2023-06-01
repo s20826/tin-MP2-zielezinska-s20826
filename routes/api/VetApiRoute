@@ -1,0 +1,13 @@
+const express= require('express');
+const router = express.Router();
+
+const vetApiController = require('../../api/VetAPI');
+const isAuth = require('../../middleware/isAuth')
+
+router.get('/', vetApiController.getVets);
+router.get('/:idVet',vetApiController.getVetById);
+router.post('/', vetApiController.createVet);
+router.put('/:idVet', vetApiController.updateVet);
+router.delete('/:idVet', isAuth, vetApiController.deleteVet)
+
+module.exports = router;

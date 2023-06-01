@@ -1,0 +1,23 @@
+<main>
+<div id="login">
+    <h2><%= __('auth.sign-in')%></h2>
+    <form class="form" id="form" method="post" action="/login" novalidate>
+        <label for="loginEmail"><%= __('auth.email')%></label>
+        <input type="email" id="loginEmail" name="email">
+        <span></span>
+
+        <label for="loginPassword"><%= __('auth.password')%></label>
+        <input type="password" id="loginPassword" name="password">
+        <span></span>
+
+        <label for="loginPassword"></label>
+        <span class="loginErrors" id="loginErrors"><%=loginError ? loginError : ''%></span>
+
+        <div class="form-buttons-auth">
+        <input class="log-button" type="submit"  value="<%= __('auth.log-in')%>">
+            <input type="button" onclick="location.href='../../vets/add';" value="<%= __('auth.register')%>">
+            <span></span>
+        </div>
+    </form>
+</div>
+    </main>

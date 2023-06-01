@@ -1,0 +1,1 @@
+module.export = {secret: 'very_secret_key'}

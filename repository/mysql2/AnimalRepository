@@ -1,0 +1,204 @@
+const db = require('../../config/mysql2/db');
+const aSchema = require('../../model/joi/Animal')
+
+exports.getAnimals = () => {
+
+    return db.promise().query('SELECT * FROM Animal')
+        .then( (results, fields) =>{
+            return results[0];
+        })
+        .catch( err => {
+            console.log(err);
+            throw err;
+        })
+};
+
+exports.getHistory = () => {
+
+    return db.promise().query('SELECT * FROM History')
+        .then( (results, fields) =>{
+            return results[0];
+        })
+        .catch( err => {
+            console.log(err);
+            throw err;
+        })
+};
+
+exports.getAnimalById2 = (idAnimal) => {
+
+    const query = 'SELECT a.idAnimal , a.name, a.species, a.breed, a.weight, a.birthDate, \n' +
+        'a.idClient, p.firstName as clientFirstName , p.lastname as clientLastName, v.idVisit , v.idVet, \n' +
+        'v.date, v.service, v.price, p1.firstName as vetFirstName, p1.lastname as vetLastName \n'+
+        'from Animal a \n' +
+        'LEFT JOIN  Visit v on a.idAnimal = v.idAnimal \n'+
+        'LEFT JOIN  Person p on a.idClient = p.idPerson \n' +
+        'LEFT JOIN  Person p1 on v.idVet =p1.idPerson \n' +
+        'where a.idAnimal = ? '
+
+
+    return db.promise().query(query, [idAnimal])
+        .then( (results, fields) => {
+
+            const firstRow = results[0][0];
+            if(!firstRow){
+                return {};
+            }
+
+            const animal = {
+                idAnimal: parseInt(idAnimal),
+                name: firstRow.name,
+                species: firstRow.species,
+                breed: firstRow.breed,
+                weight: firstRow.weight,
+                birthDate: firstRow.birthDate,
+                idClient: firstRow.idClient,
+            }
+            return animal;
+
+        })
+        .catch( err => {
+            console.log(err);
+            throw err;
+        })
+
+};
+
+
+exports.getAnimalById = (idAnimal) => {
+
+    const query = 'SELECT a.idAnimal , a.name, a.species, a.breed, a.weight, a.birthDate, \n' +
+        'a.idClient, p.firstName as clientFirstName , p.lastname as clientLastName, v.idVisit , v.idVet, \n' +
+        'v.date, v.service, v.price, p1.firstName as vetFirstName, p1.lastname as vetLastName \n'+
+        'from Animal a \n' +
+        'LEFT JOIN  Visit v on a.idAnimal = v.idAnimal \n'+
+        'LEFT JOIN  Person p on a.idClient = p.idPerson \n' +
+        'LEFT JOIN  Person p1 on v.idVet =p1.idPerson \n' +
+        'where a.idAnimal = ? '
+
+
+    return db.promise().query(query, [idAnimal])
+        .then( (results, fields) => {
+
+            const firstRow = results[0][0];
+           if(!firstRow){
+                return {};
+            }
+
+            const animal = {
+                idAnimal: parseInt(idAnimal),
+                name: firstRow.name,
+                species: firstRow.species,
+                breed: firstRow.breed,
+                weight: firstRow.weight,
+                birthDate: firstRow.birthDate,
+                client: {
+                    idClient: firstRow.idClient,
+                    clientFirstName: firstRow.clientFirstName,
+                    clientLastName: firstRow.clientLastName,
+                },
+                visits: []
+            }
+
+            for (let i = 0; i <results[0].length ; i++) {
+                const row = results[0][i];
+                if(row.idVisit){
+                    const visit = {
+                        idVisit: row.idVisit,
+                        vet: {
+                            idVet: row.idVet,
+                            vetFirstName: row.vetFirstName,
+                            vetLastName: row.vetLastName,
+                        },
+                        date: row.date,
+                        service: row.service,
+                        price: row.price
+                    };
+                    animal.visits.push(visit);
+                }
+
+            }
+
+            return animal;
+
+        })
+        .catch( err => {
+            console.log(err);
+            throw err;
+        })
+
+};
+
+exports.createAnimal = (newAnimalData) => {
+
+    const vRes = aSchema.validate(newAnimalData,{ abortEarly: false });
+    if(vRes.error){
+        return Promise.reject(vRes.error);
+    }
+
+    const name= newAnimalData.name;
+    const species= newAnimalData.species;
+    const breed= newAnimalData.breed;
+    const weight= newAnimalData.weight;
+    const birthDate= newAnimalData.birthDate;
+    const idClient = newAnimalData.idClient;
+
+    const comment = "Dodano zwierze o nazwie "+name;
+
+    const sql = 'INSERT into Animal (name, species, breed, weight, birthDate, idClient) VALUES (?, ?, ?, ?, ?, ?)';
+    const sql1 = 'INSERT into History (comment) VALUES (?)';
+
+
+    return db.promise().execute(sql,[ name,species,breed,weight,birthDate,idClient])
+    .then(()=> {
+       return db.promise().execute(sql1,[comment])
+    });
+
+
+};
+exports.updateAnimal = (idAnimal, animalData) => {
+
+    const vRes = aSchema.validate(animalData,{ abortEarly: false });
+    if(vRes.error){
+        return Promise.reject(vRes.error);
+    }
+
+    const name= animalData.name;
+    const species= animalData.species;
+    const breed= animalData.breed;
+    const weight= animalData.weight;
+    const birthDate= animalData.birthDate;
+    const idClient = animalData.idClient;
+
+    const comment = "Edytowano zwierze o nazwie "+name;
+
+
+    const sql = 'UPDATE Animal set name=?, species=?, breed=?, weight=?, birthDate=?, idClient=? where idAnimal = ?';
+    const sql1 = 'INSERT into History (comment) VALUES (?)';
+
+    
+    return db.promise().execute(sql,[ name,species,breed,weight,birthDate,idClient,idAnimal])
+    .then(()=> {
+        return db.promise().execute(sql1,[comment])
+     });
+
+};
+exports.deleteAnimal = (idAnimal) => {
+
+    const sql1 = 'DELETE FROM Visit where idAnimal = ?';
+    const sql2 = 'DELETE FROM Animal where idAnimal = ?';
+    const sql3 = 'INSERT into History (comment) VALUES (?)';
+
+
+    const comment = "Usunięto zwierze o indeksie "+idAnimal;
+
+
+    return db.promise()
+        .execute(sql1,[idAnimal])
+        .then(()=> {
+            return db.promise().execute(sql2,[idAnimal])
+        }).then(()=> {
+            return db.promise().execute(sql2,[comment])
+        })
+
+};

@@ -1,0 +1,99 @@
+<%- include('../../fragments/header.ejs')%>
+<% if(!loggedUser) { %>
+    <%- include('../../fragments/auth.ejs')%>
+<%} else { %>
+<div class="container">
+        <main>
+            <h2><%= __('visit.pages.list')%></h2>
+            <table class="table-list">
+                <thead>
+                    <tr>
+                        <th><%= __('visit.fields.animal')%></th>
+                        <th><%= __('visit.fields.vet')%></th>
+                        <th><%= __('visit.fields.date')%></th>
+                    </tr>
+                    <tbody>
+                <% for (let v of Visit) { %>
+                    <tr>
+                        <td><%= v.name %></td>
+                        <td><%= v.firstName+" "+v.lastName %></td>
+                        <td><%= new Date(v.date).toISOString()
+                                    .replace(/T/, ' ')
+                                    .replace(/\..+/, '')
+                            %></td>
+
+                            <td>
+                                <ul class="list-actions">
+                                    <li>
+                                        <a href="../../animals/details/<%=v.idAnimal%>">
+                                            <svg class="list-actions-button-details" xmlns="http://www.w3.org/2000/svg" width="192" height="192" fill="#000000" viewBox="0 0 256 256">
+                                                <rect  width="256" height="256" fill="none"></rect>
+                                                <g class="details-icon-color" opacity="0.1"></g>
+                                                <circle class="details-icon-color" cx="128" cy="128" r="96" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></circle>
+                                                <polyline class="details-icon-color" points="120 120 128 120 128 176 136 176" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline>
+                                                <circle class="details-icon-color dot" cx="126" cy="84" r="12"></circle>
+                                            </svg>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="../../visits/edit/<%=v.idVisit%>" >
+                                            <svg class="list-actions-button-edit" xmlns="http://www.w3.org/2000/svg" width="192" height="192" fill="#000000" viewBox="0 0 256 256">
+                                                <rect class="details-icon-color" width="256" height="256" fill="none"></rect>
+                                                <path class="details-icon-color" d="M96,216H48a8,8,0,0,1-8-8V163.31371a8,8,0,0,1,2.34315-5.65686l120-120a8,8,0,0,1,11.3137,0l44.6863,44.6863a8,8,0,0,1,0,11.3137Z" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                                                <line class="details-icon-color" x1="136" y1="64" x2="192" y2="120" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                                <polyline class="details-icon-color" points="216 216 96 216 40.509 160.509" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline>
+                                            </svg>
+                                        </a>
+                                    </li>
+                                    <li>                                      
+                                        <a href="../../visits/ifDelete/<%=v.idVisit%>">
+                                            <svg  class="list-actions-button-delete" xmlns="http://www.w3.org/2000/svg" width="192" height="192" fill="#000000" viewBox="0 0 256 256">
+                                                <rect width="256" height="256" fill="none"></rect>
+                                                <line class="details-icon-color" x1="215.99609" y1="56" x2="39.99609" y2="56.00005" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                                <line class="details-icon-color" x1="104" y1="104" x2="104" y2="168" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                                <line class="details-icon-color" x1="152" y1="104" x2="152" y2="168" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                                                <path class="details-icon-color"d="M200,56V208a8,8,0,0,1-8,8H64a8,8,0,0,1-8-8V56" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                                                <path class="details-icon-color" d="M168,56V40a16,16,0,0,0-16-16H104A16,16,0,0,0,88,40V56" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                                            </svg>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </td>
+                            
+                        </tr>
+                <% } %>
+                    </tbody>
+
+            </table>
+
+            <% if (actionBefore === 'add') { %>
+                <div id="hideMe"  ><%= __('visit.comment.added')%></div>
+            <% } %>
+            <% if (actionBefore === 'edit') { %>
+                <div id="hideMe"  ><%= __('visit.comment.edited')%></div>
+            <% } %>
+            <% if (actionBefore === 'delete') { %>
+                <div id="hideMe" ><%= __('visit.comment.deleted')%></div>
+            <% } %>
+
+            <p>
+                <a href="../../visits/add" >
+                    <svg class="button-add" xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="#000000" viewBox="0 0 256 256">
+                        <rect  width="256" height="256" fill="none"></rect>
+                        <line class="details-icon-color" x1="40" y1="128" x2="216" y2="128" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                        <line class="details-icon-color" x1="128" y1="40" x2="128" y2="216" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                    </svg>
+                </a>
+            </p>
+        </main>
+    <div class="loggedButton">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#000000" viewBox="0 0 256 256">
+            <rect width="256" height="256" fill="none"></rect>
+            <circle cx="128" cy="96" r="64" fill="none" stroke="#000000" stroke-miterlimit="10" stroke-width="16"></circle>
+            <path d="M31,216a112,112,0,0,1,194,0" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+        </svg>
+        <span><%=loggedUser.firstName + " " + loggedUser.lastName%></span>
+    </div>
+</div>
+<%}%>
+<%- include('../../fragments/footer.ejs')%>

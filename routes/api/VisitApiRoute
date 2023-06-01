@@ -1,0 +1,16 @@
+const express= require('express');
+const router = express.Router();
+
+const visitApiController = require('../../api/VisitAPI');
+const animalApiController = require('../../api/AnimalAPI');
+
+
+router.get('/', visitApiController.getVisits);
+//router.get('/:idAnimal', animalApiController.getAnimalById);
+router.get('/:idVisit',visitApiController.getVisitById);
+router.get('/form/:idVisit',visitApiController.getVisitById2);
+router.post('/', visitApiController.createVisit);
+router.put('/:idVisit', visitApiController.updateVisit);
+router.delete('/:idVisit', visitApiController.deleteVisit);
+
+module.exports = router;

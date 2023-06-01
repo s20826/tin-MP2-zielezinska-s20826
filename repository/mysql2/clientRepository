@@ -1,0 +1,162 @@
+const db = require('../../config/mysql2/db');
+const cSchema = require('../../model/joi/Client')
+
+
+exports.getClients = () => {
+
+    return db.promise().query('SELECT * FROM Person p right JOIN Client c on c.idClient = p.idPerson')
+        .then( (results, fields) =>{
+            console.log(results[0]);
+            return results[0];
+        })
+        .catch( err => {
+            console.log(err);
+            throw err;
+        })
+};
+
+exports.getClientById = (idClient) => {
+
+    const query = 'SELECT c.idClient , p.firstName, p.lastName, p.email, c.phoneNumber ' +
+        'from Person p right JOIN  Client c on c.idClient = p.idPerson ' +
+        'where c.idClient = ? '
+
+
+    return db.promise().query(query, [idClient])
+        .then((results, fields) => {
+
+            const firstRow = results[0][0];
+            if(!firstRow){
+                return {};
+            }
+
+            return {
+                idClient: parseInt(idClient),
+                firstName: firstRow.firstName,
+                lastName: firstRow.lastName,
+                email: firstRow.email,
+                phoneNumber: firstRow.phoneNumber
+
+            };
+
+        })
+        .catch( err => {
+            console.log(err);
+            throw err;
+        })
+
+};
+
+checkEmailUnique = (email, idClient) =>{
+    let promise;
+    if(idClient){
+        const sql='select count(1) as c from Person where idPerson !=? and email = ?';
+        promise = db.promise().query(sql,[idClient, email]);
+        console.log(promise)
+
+    }else{
+        const sql='select count(1) as c from Person where email = ?';
+        promise = db.promise().query(sql,[email]);
+    }
+    return promise.then((results, fields)=>{
+        const count = results[0][0].c;
+        let err=null;
+        if(count>0){
+            err = {
+                details: [{
+                    path:['email'],
+                    message: 'podany adres email jest juz używany'
+                }]
+            }
+
+        }
+        return err;
+    });
+}
+
+exports.createClient = (newClientData) => {
+
+    const vRes = cSchema.validate(newClientData,{ abortEarly: false });
+    if(vRes.error){
+        return Promise.reject(vRes.error);
+    }
+
+    return checkEmailUnique(newClientData.email)
+        .then(emailErr =>{
+            if(emailErr){
+                return Promise.reject(emailErr);
+            }
+            else {
+
+                const sql = 'INSERT into Person (firstName, lastName, email) VALUES (?, ?, ?)';
+                const sql1 = 'INSERT into Client (idClient, phoneNumber) VALUES (LAST_INSERT_ID(), ?)';
+
+                return db.promise()
+                    .execute(sql,[ newClientData.firstName, newClientData.lastName, newClientData.email])
+                    .then(()=> {
+                        return db.promise().execute(sql1,[newClientData.phoneNumber])
+                    })
+
+            }
+        })
+        .catch(err => {
+            return Promise.reject(err);
+        });
+};
+
+
+
+exports.updateClient = (idClient, clientData) => {
+
+    const vRes = cSchema.validate(clientData,{ abortEarly: false });
+    if(vRes.error){
+        return Promise.reject(vRes.error);
+    }
+    return checkEmailUnique(clientData.email,idClient)
+        .then(emailErr =>{
+            if(emailErr){
+                return Promise.reject(emailErr);
+            }
+            else {
+
+    const firstName= clientData.firstName;
+    const lastName= clientData.lastName;
+    const email= clientData.email;
+    const phoneNumber= clientData.phoneNumber;
+
+
+    const sql = 'UPDATE Person set firstName=?, lastName=?, email=? where idPerson = ?';
+    const sql1 = 'UPDATE Client set phoneNumber=? where idClient = ?';
+
+
+    return db.promise()
+        .execute(sql,[ firstName,lastName,email,idClient])
+        .then(()=> {
+            return db.promise().execute(sql1,[phoneNumber,idClient])
+        })
+            }
+        })
+        .catch(err => {
+            return Promise.reject(err);
+        });
+
+};
+exports.deleteClient = (idClient) => {
+
+    const sql = 'DELETE FROM Visit where idAnimal = (select idAnimal from Animal where idClient = ?)';
+    const sql1 = 'DELETE FROM Animal where idClient = ?';
+    const sql2 = 'DELETE FROM Client where idClient = ?';
+    const sql3 = 'DELETE FROM Person where idPerson = ?';
+
+
+    return db.promise()
+        .execute(sql,[idClient])
+        .then( ()=> {
+            return db.promise().execute(sql1,[idClient])
+        })
+        .then( ()=> {
+            return db.promise().execute(sql2, [idClient]);
+        }).then( ()=> {
+            return db.promise().execute(sql3, [idClient]);
+        });
+};

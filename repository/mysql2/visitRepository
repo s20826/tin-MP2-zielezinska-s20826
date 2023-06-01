@@ -1,0 +1,144 @@
+const db = require('../../config/mysql2/db');
+const vSchema = require('../../model/joi/Visit')
+
+
+exports.getVisits = () => {
+
+    return db.promise().query('SELECT v.idVisit, a.name, p.firstName , v.idAnimal, p.lastName, v.date  FROM Visit v join Animal a on v.idAnimal=a.idanimal ' +
+        'join Person p on p.idPerson=v.idVet')
+        .then( (results, fields) =>{
+            console.log(results[0]);
+            return results[0];
+        })
+        .catch( err => {
+            console.log(err);
+            throw err;
+        })
+};
+
+exports.getVisitById2 = (idVisit) => {
+
+    const query = 'SELECT a.idAnimal , a.name, p.firstName, p.lastName, v.date, v.service, v.price, ' +
+        ' v.idVisit , v.idVet ' +
+        'from Animal a ' +
+        'LEFT JOIN  Visit v on a.idAnimal = v.idAnimal '+
+        'LEFT JOIN  Person p on v.idVet =p.idPerson ' +
+        'where v.idVisit = ? '
+
+
+    return db.promise().query(query, [idVisit])
+        .then( (results, fields) => {
+
+            const firstRow = results[0][0];
+            if(!firstRow){
+                return {};
+            }
+
+            const visit = {
+                idVisit: parseInt(idVisit),
+                date: firstRow.date,
+                service: firstRow.service,
+                price: firstRow.price,
+                    idAnimal: firstRow.idAnimal,
+                    idVet: firstRow.idVet,
+            }
+            console.log(visit)
+            return visit;
+
+        })
+        .catch( err => {
+            console.log(err);
+            throw err;
+        })
+
+};
+
+exports.getVisitById = (idVisit) => {
+
+    const query = 'SELECT a.idAnimal , a.name, p.firstName, p.lastName, v.date, v.service, v.price, ' +
+        ' v.idVisit , v.idVet ' +
+        'from Animal a ' +
+        'LEFT JOIN  Visit v on a.idAnimal = v.idAnimal '+
+        'LEFT JOIN  Person p on v.idVet =p.idPerson ' +
+        'where v.idVisit = ? '
+
+
+    return db.promise().query(query, [idVisit])
+        .then( (results, fields) => {
+
+            const firstRow = results[0][0];
+            if(!firstRow){
+                return {};
+            }
+
+            const visit = {
+                idVisit: parseInt(idVisit),
+                date: firstRow.date,
+                service: firstRow.service,
+                price: firstRow.price,
+                animal:{
+                    idAnimal: firstRow.idAnimal,
+                    name: firstRow.name,
+                },
+                vet: {
+                    idVet: firstRow.idVet,
+                    firstName: firstRow.firstName,
+                    lastName: firstRow.lastName,
+                },
+            }
+console.log(visit)
+            return visit;
+
+        })
+        .catch( err => {
+            console.log(err);
+            throw err;
+        })
+
+};
+
+exports.createVisit = (newVisitData) => {
+
+    const vRes = vSchema.validate(newVisitData,{ abortEarly: false });
+    if(vRes.error){
+        return Promise.reject(vRes.error);
+    }
+    const idAnimal= newVisitData.idAnimal;
+    const idVet= newVisitData.idVet;
+    const date= newVisitData.date;
+    const service= newVisitData.service;
+    const price= newVisitData.price;
+
+    const sql = 'INSERT into Visit (idAnimal, idVet, date, service, price) VALUES (?, ?, ?, ?, ?)';
+
+    return db.promise().execute(sql,[ idAnimal,idVet,date,service,price]);
+
+
+};
+exports.updateVisit = (idVisit, visitData) => {
+
+    const vRes = vSchema.validate(visitData,{ abortEarly: false });
+    if(vRes.error){
+        return Promise.reject(vRes.error);
+    }
+
+    const idAnimal= visitData.idAnimal;
+    const idVet= visitData.idVet;
+    const date= visitData.date;
+    const service= visitData.service;
+    const price= visitData.price;
+
+    const sql = 'UPDATE Visit set idAnimal=?, idVet=?, date=?, service=?, price=? where idVisit = ?';
+
+    return db.promise().execute(sql,[ idAnimal,idVet,date,service,price, idVisit]);
+
+};
+exports.deleteVisit = (idVisit) => {
+
+    const sql1 = 'DELETE FROM Visit where idVisit = ?';
+
+    return db.promise()
+        .execute(sql1,[idVisit]);
+
+
+};

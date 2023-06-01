@@ -1,0 +1,93 @@
+const VisitRepository = require('../repository/mysql2/visitRepository');
+
+exports.getVisits = (req, res, next) => {
+    VisitRepository.getVisits()
+        .then(a => {
+
+            res.status(200).json(a);
+        })
+        .catch(err => {
+            console.log(err);
+        });
+};
+
+exports.getVisitById2 = (req, res, next) => {
+    const idVisit = req.params.idVisit;
+    VisitRepository.getVisitById2(idVisit)
+        .then(a => {
+            console.log(a)
+            if(!a){
+                res.status(404).json({
+                    message: 'Animal with id:'+ idVisit +'not found'
+                })
+            }else {
+                res.status(200).json(a);
+            }
+        })
+
+};
+
+exports.getVisitById = (req, res, next) => {
+    const idVisit = req.params.idVisit;
+    VisitRepository.getVisitById(idVisit)
+        .then(a => {
+            console.log(a)
+            if(!a){
+                res.status(404).json({
+                    message: 'Animal with id:'+ idVisit +'not found'
+                })
+            }else {
+                res.status(200).json(a);
+            }
+        })
+
+};
+
+exports.createVisit = (req, res, next) => {
+    VisitRepository.createVisit(req.body)
+        .then(a => {
+            res.status(201).json(a);
+        })
+        .catch(err => {
+            console.log(err)
+            if(!err.statusCode){
+                err.statusCode = 500;
+            }
+            next(err);
+        });
+};
+
+exports.updateVisit = (req, res, next) => {
+    const idVisit = req.params.idVisit;
+    VisitRepository.updateVisit(idVisit, req.body)
+        .then(v => {
+            res.status(200).json({
+                message: 'Visit updated!', visit: v
+            });
+        })
+        .catch(err => {
+            console.log(err)
+            if(!err.statusCode){
+                err.statusCode = 500;
+            }
+            next(err);
+        });
+};
+
+exports.deleteVisit = (req, res, next) => {
+    const idVisit = req.params.idVisit;
+
+    VisitRepository.deleteVisit(idVisit)
+        .then(v => {
+            res.status(200).json({
+                message: 'Visit removed!', visit: v
+            });
+        })
+        .catch(err => {
+            console.log(err)
+            if(!err.statusCode){
+                err.statusCode = 500;
+            }
+            next(err);
+        });
+};

@@ -1,0 +1,13 @@
+<footer>
+    <% if(loggedUser) { %>
+        <a class="loggoutButton" href="/logout"><%= __('auth.log-out')%></a>
+    <%}%>
+
+</footer>
+<ul>
+        <li><a href="/changeLang/pl" class="<%= lang === 'pl' ? 'active' : ''%>" >PL</a></li>
+        <li><a href="/changeLang/en" class="<%= lang === 'en' ? 'active' : ''%>">EN</a></li>
+</ul>
+
+</body>
+</html>

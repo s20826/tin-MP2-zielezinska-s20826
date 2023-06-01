@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pl-PL">
+<head>
+    <meta charset="UTF-8">
+    <title>MED-PET Veterinary Clinic</title>
+    <link rel="stylesheet" href="../../css/style.css" />
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <script type="application/javascript" src="../../js/validationCommon.js"></script>
+
+    <% if (navLocation === 'animal') { %>
+        <script type="application/javascript" src="../../js/validationAnimalForm.js"></script>
+    <% } %>
+    <% if (navLocation === 'client') { %>
+        <script type="application/javascript" src="../../js/validationClientForm.js"></script>
+    <% } %>
+    <% if (navLocation === 'vet') { %>
+        <script type="application/javascript" src="../../js/validationVetForm.js"></script>
+    <% } %>
+    <% if (navLocation === 'visit') { %>
+        <script type="application/javascript" src="../../js/validationVisitForm.js"></script>
+    <% } %>
+
+</head>
+<body>
+<header>
+    <h1> <%= __('main-page.start')%></h1>
+    <img src="/images/logo.png" alt="MED-PET Veterinary Clinic Logo" width="125" height="100">
+
+</header>
+<% if(loggedUser) { %>
+
+<nav>
+
+    <ul>
+        <li><a href="/" class="<%= navLocation === 'main' ? 'active' : ''%>" ><%= __('nav.main')%></a></li>
+        <li><a href="/animals" class="<%= navLocation === 'animal' ? 'active' : ''%>"><%= __('nav.animal')%></a></li>
+        <li><a href="/clients" class="<%= navLocation === 'client' ? 'active' : ''%>"><%= __('nav.client')%></a></li>
+        <li><a href="/vets" class="<%= navLocation === 'vet' ? 'active' : ''%>"><%= __('nav.vet')%></a></li>
+        <li><a href="/visits" class="<%= navLocation === 'visit' ? 'active' : ''%>"><%= __('nav.visit')%></a></li>
+
+    </ul>
+
+</nav>
+
+<%}%>

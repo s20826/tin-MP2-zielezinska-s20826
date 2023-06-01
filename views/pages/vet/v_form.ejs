@@ -1,0 +1,87 @@
+<%- include('../../fragments/header.ejs')%>
+
+<div class="container">
+        <main>
+            <h2><%= pageTitle %></h2>
+
+            <% if(loggedUser) { %>
+            <form class="form" method="post" action="../../" novalidate onsubmit="return validateForm();">
+            <%}else{%>
+                <form class="form" method="post" action="<%=formAction%>"  novalidate onsubmit="return validateForm();" >
+            <%}%>
+
+                <input type="hidden" name="idVet" value="<%= Vet.idVet%>">
+
+                <label for="firstName"><%= __('vet.fields.firstName')%>: <span class="symbol-required">*</span></label>
+                <input class="<%= validationErrors.find(e => e.path.includes('firstName')) ? 'error-input' : ''%>"
+                       type="text" name="firstName" id="firstName" placeholder="2-30 <%= __('form-placeholder.character')%>" value="<%= Vet.firstName%>" required />
+                <span id="errorFristName" class="errors-text">
+                    <%if (validationErrors.find(e=> e.path.includes('firstName'))) { %>
+                        <%= validationErrors.find(e=> e.path.includes('firstName')).message %>
+                    <%}%>
+                </span>
+                    <div style="display: none">
+                        <span id="error-required"><%= __('validationMessage.fieldRequired')%></span>
+                        <span id="error-min"><%= __('validationMessage.fieldMin')%></span>
+                        <span id="error-max"><%= __('validationMessage.fieldMax')%></span>
+                        <span id="error-character"><%= __('validationMessage.characters')%></span>
+                        <span id="error-email"><%= __('validationMessage.email')%></span>
+                        </div>
+                <label for="LastName"><%= __('vet.fields.lastName')%>: <span class="symbol-required">*</span></label>
+                <input class="<%= validationErrors.find(e => e.path.includes('lastName')) ? 'error-input' : ''%>"
+                        type="text" name="lastName" id="lastName" placeholder="2-30 <%= __('form-placeholder.character')%>" value="<%= Vet.lastName%>" required />
+                <span id="errorLastName" class="errors-text">
+                    <%if (validationErrors.find(e=> e.path.includes('lastName'))) { %>
+                        <%= validationErrors.find(e=> e.path.includes('lastName')).message %>
+                    <%}%>
+                </span>
+
+                <label for="email"><%= __('vet.fields.email')%>: <span class="symbol-required">*</span></label>
+                <input class="<%= validationErrors.find(e => e.path.includes('lastName')) ? 'error-input' : ''%>"
+                        type="email" name="email" id="email" placeholder="<%= __('form-placeholder.email')%>" value="<%= Vet.email%>" required />
+                <span id="errorEmail" class="errors-text">
+                    <%if (validationErrors.find(e=> e.path.includes('email'))) { %>
+                        <%= validationErrors.find(e=> e.path.includes('email')).message %>
+                    <%}%>
+                </span>
+
+                <label for="password"><%= __('vet.fields.password')%>: <span class="symbol-required">*</span></label>
+                <input class="<%= validationErrors.find(e => e.path.includes('password')) ? 'error-input' : ''%>"
+                       type="password" name="password" id="password" placeholder="2-30 <%= __('form-placeholder.character')%>" value="<%= Vet.password%>" required />
+                <span id="errorPassword" class="errors-text">
+                    <%if (validationErrors.find(e=> e.path.includes('password'))) { %>
+                        <%= validationErrors.find(e=> e.path.includes('password')).message %>
+                    <%}%>
+                </span>
+                
+                <div class="form-buttons">
+                    <button class="form-actions-button-submit" type="submit" >
+                        <svg class="form-actions-button-submit" xmlns="http://www.w3.org/2000/svg"  width="50" height="50" fill="#000000" viewBox="0 0 256 256">
+                            <rect width="256" height="256" fill="none"></rect>
+                            <polyline class="details-icon-color" points="216 72.005 104 184 48 128.005" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></polyline>
+                        </svg>
+                    </button>
+                    <a  href="/vets" >
+                        <svg class="form-actions-button-cancel" xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="#000000" viewBox="0 0 256 256">
+                            <rect width="256" height="256" fill="none"></rect>
+                            <line class="details-icon-color" x1="200" y1="56" x2="56" y2="200" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                            <line class="details-icon-color" x1="200" y1="200" x2="56" y2="56" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                        </svg>
+                    </a>
+                </div>
+                </form>
+
+        </main>
+    <div class="loggedButton">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#000000" viewBox="0 0 256 256">
+            <rect width="256" height="256" fill="none"></rect>
+            <circle cx="128" cy="96" r="64" fill="none" stroke="#000000" stroke-miterlimit="10" stroke-width="16"></circle>
+            <path d="M31,216a112,112,0,0,1,194,0" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+        </svg>
+        <% if(loggedUser) { %>
+        <span><%=loggedUser.firstName + " " + loggedUser.lastName%></span>
+        <%}%>
+    </div>
+</div>
+
+<%- include('../../fragments/footer.ejs')%>
